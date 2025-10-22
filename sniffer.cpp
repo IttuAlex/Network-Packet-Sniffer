@@ -12,22 +12,42 @@ void packet_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *byt
 
 }
 
-// trebuie sparta in 2 functii pentru ca face 2 lucruri
-void take_interface(int nr_packets){
+char *take_interface(){
     pcap_if_t *alldevsp, *d;
     pcap_t *interface;
     char errbuf[PCAP_ERRBUF_SIZE];
-    
+    char *interface_name;
     if(pcap_findalldevs(&alldevsp, errbuf) == -1){
         cerr << "Error" << errbuf << endl;
        
     }
     
-    char *interface_name = alldevsp->name;
+    char *source = alldevsp->name;
     
+    int i=0;
+    while(source[i] != '\0')
+        i++;
+     
+    for(int j=0; j<=i; j++){
+        interface_name[i] = source[i];
+
+    }
+
     cout << "Interface mapping done" << endl;
     
-    if(interface_name){
+    pcap_freealldevs(alldevsp);
+
+    return interface_name;
+
+
+}
+
+void packet_capture(int nr_packets){
+    char errbuf[PCAP_ERRBUF_SIZE];
+    pcap_t *interface;
+    char *interface_name = take_interface();
+
+        if(interface_name){
         interface = pcap_open_live(interface_name, 65535, 1, 1000, errbuf);
         
     }
@@ -47,9 +67,6 @@ void take_interface(int nr_packets){
 
 
     pcap_close(interface);
-    pcap_freealldevs(alldevsp);
-
-
 }
 
 void show_decimal(char *errbuf, int nr_packets){
@@ -79,6 +96,5 @@ int main(){
     
     
     
-
-    return 0;
+    return 0;
 }
